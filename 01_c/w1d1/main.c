@@ -48,9 +48,14 @@ void *my_memcpy(void *dst, const void *src, size_t n)
      *   - 按标准要返回 dst
      *   - n == 0 时不许碰 dst
      */
-    (void)dst;
-    (void)src;
-    (void)n;
+   
+    unsigned char *d = (unsigned char *)dst;
+    const unsigned char *s =(const unsigned char *)src;
+    size_t i;
+    for (i=0;i< n;i++){
+        d[i] = s[i];
+    
+    }
     return dst; /* TODO: 改掉 */
 }
 
@@ -58,15 +63,23 @@ void *my_memcpy(void *dst, const void *src, size_t n)
 char *my_strcpy(char *dst, const char *src)
 {
     /* 提示：循环直到遇到 '\0'，把它也复制过去，最后返回 dst */
-    (void)src;
+    size_t i = 0;
+    for (i=0; src[i] != '\0';i++){
+        dst[i] = src[i];
+    }
+    dst[i] = '\0'; // 添加结尾的 '\0'
     return dst; /* TODO: 改掉 */
 }
 
 /* ================= TODO 3：交换两个 int ================= */
 void swap_int(int *a, int *b)
 {
-    (void)a;
-    (void)b;
+    
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+
+
     /* TODO: 改掉 */
 }
 
@@ -75,9 +88,28 @@ void swap_generic(void *a, void *b, size_t size)
 {
     /* 提示：用一个临时字节数组（比如 unsigned char tmp[64]），
      *       逐字节交换。想清楚 size > 64 时会发生什么。 */
-    (void)a;
-    (void)b;
-    (void)size;
+    if (size > 64){
+        return;
+    }
+    unsigned char tmp[64];
+    unsigned char *pa = (unsigned char *)a;
+    unsigned char *pb = (unsigned char *)b;
+    size_t i;
+    for (i=0;i<size;i++){
+        tmp[i] = pa[i];
+        pa[i] = pb[i];
+        pb[i] = tmp[i];
+    }
+
+
+
+
+
+
+
+
+
+
     /* TODO: 改掉 */
 }
 
