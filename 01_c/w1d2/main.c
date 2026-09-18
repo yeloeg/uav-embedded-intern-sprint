@@ -77,13 +77,13 @@ static void show_memory_layout(void)
 
 /* TODO 5：清掉第 bit 位（其他位不变）
  * 下面这个占位写法能编译，但什么也不做，所以测试会 FAIL —— 改成真正的实现 */
-#define CLR_BIT(reg, bit)    ((reg) |= 0u)
+#define CLR_BIT(reg, bit)    ((reg) &= ~(1u << (bit)))
 
 /* TODO 6：翻转第 bit 位（占位写法同样是什么都不做） */
-#define TOGGLE_BIT(reg, bit) ((reg) |= 0u)
+#define TOGGLE_BIT(reg, bit) ((reg) ^= (1u << (bit)))
 
 /* TODO 7：读出第 bit 位的值（0 或 1），占位写法永远返回 0 */
-#define READ_BIT(reg, bit)   (0u)
+#define READ_BIT(reg, bit)   (((reg) >> (bit)) & 1u)
 
 /* ===================== 三、环形缓冲区（TODO 8-12） ===================== */
 
@@ -98,45 +98,56 @@ typedef struct {
 /* TODO 8：初始化为空 */
 void rb_init(ring_buffer_t *rb)
 {
-    (void)rb;
+    memset(rb->buf, 0, sizeof(rb->buf));
+    rb->head = 0;
+    rb->tail = 0;
     /* TODO: 把 head / tail 归零，把 buf 清干净 */
 }
 
 /* TODO 9：空返回 1，否则返回 0 */
 int rb_is_empty(const ring_buffer_t *rb)
 {
-    (void)rb;
-    return 1; /* TODO: 改掉 */
+    
+    return rb->head == rb->tail; /* TODO: 改掉 */
 }
 
 /* TODO 10：满返回 1，否则返回 0 */
 int rb_is_full(const ring_buffer_t *rb)
 {
-    (void)rb;
-    return 0; /* TODO: 改掉 */
+    
+    return (rb->head + 1) % RB_SIZE == rb->tail;
+    /* TODO: 改掉 */
 }
 
 /* TODO 11：当前存了多少个字节 */
 size_t rb_count(const ring_buffer_t *rb)
 {
-    (void)rb;
-    return 0; /* TODO: 改掉 */
+    
+    return (rb->head +RB_SIZE- rb->tail) % RB_SIZE; /* TODO: 改掉 */
 }
 
 /* TODO 12：写入一个字节。成功返回 0，缓冲区满返回 -1 */
 int rb_put(ring_buffer_t *rb, uint8_t data)
 {
-    (void)rb;
-    (void)data;
-    return -1; /* TODO: 改掉 */
+    if (rb_is_full(rb)){
+        return -1;
+    }
+    rb->buf[rb->head] = data;
+    rb->head = (rb->head + 1) % RB_SIZE;
+    return 0;
+     /* TODO: 改掉 */
 }
 
 /* TODO 13：读出一个字节到 *out。成功返回 0，缓冲区空返回 -1 */
 int rb_get(ring_buffer_t *rb, uint8_t *out)
 {
-    (void)rb;
-    (void)out;
-    return -1; /* TODO: 改掉 */
+    if(rb_is_empty(rb)){
+        return -1;
+    }
+    *out = rb->buf[rb->tail];
+    rb->tail = (rb->tail + 1) % RB_SIZE;
+    return 0;
+    /* TODO: 改掉 */
 }
 
 /* ============================ 测试用例（不要改） ============================ */
