@@ -67,10 +67,17 @@ static int g_led_on = 0;
  */
 static int split_args(char *line, char **argv, int max_args)
 {
-    (void)line;
-    (void)argv;
-    (void)max_args;
-    return 0; /* TODO: 改掉 */
+    char *p =line;
+    int argc = 0;
+    while (*p != '\0' && argc < max_args){
+        while (*p == ' '){p++;}
+        if (*p == '\0'){break;}
+        argv[argc++] = p;
+        while (*p != '\0' && *p != ' '){p++;}
+        if (*p == ' '){*p++ = '\0';}
+
+    }
+    return argc; /* TODO: 改掉 */
 }
 
 /* TODO 2：查表并调用对应的 handler
@@ -83,8 +90,18 @@ static int split_args(char *line, char **argv, int max_args)
  */
 static int dispatch(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    if (argc == 0){
+        return -1;
+    }
+    for (int i = 0; i< g_cmd_count;i++){
+        if (strcmp(argv[0],g_cmds[i].name) == 0){
+            g_cmds[i].handler(argc,argv);
+            return 0;
+        }
+        
+    }
+    printf("未知命令: %s\n",argv[0]);
+    printf("输入 help 看命令\n");
     return -1; /* TODO: 改掉 */
 }
 
@@ -99,11 +116,18 @@ static void cmd_help(int argc, char **argv)
     }
 }
 
+
 /* TODO 3：把 argv[1..argc-1] 用空格连起来打印一次 */
 static void cmd_echo(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    for(int i = 1;i< argc;i++){
+        printf("%s",argv[i]);
+        if (i != argc - 1){
+            printf(" ");
+        
+        }
+    }
+    printf("\n");
     /* TODO: 改掉 */
 }
 
@@ -114,9 +138,22 @@ static void cmd_echo(int argc, char **argv)
  */
 static void cmd_led(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
-    (void)g_led_on;   /* 占位：防止编译警告，实现之后可以删掉 */
+    if (argc < 2 ){
+        printf("用法: led on|off|toggle\n");
+        return;
+    }
+    if (strcmp(argv[1],"on") == 0){
+        g_led_on = 1;
+    }else if (strcmp(argv[1],"off") ==0){
+        g_led_on = 0;
+    }else if (strcmp(argv[1],"toggle") == 0){
+        g_led_on = !g_led_on;
+    }else{
+        printf("用法: led on|off|toggle\n");
+        return;
+    }
+    printf("LED: %s\n",g_led_on ? "ON" : "OFF");
+    /* 占位：防止编译警告，实现之后可以删掉 */
     /* TODO: 改掉 */
 }
 
@@ -130,6 +167,9 @@ static void cmd_sys(int argc, char **argv)
 {
     (void)argc;
     (void)argv;
+    printf("[sys] 编译器    : GCC\n");
+    printf("[sys] 编译时间  : %s\n", __DATE__ " " __TIME__);
+    printf("[sys] LED 状态  : %s\n", g_led_on ? "ON" : "OFF");
     /* TODO: 改掉 */
 }
 
